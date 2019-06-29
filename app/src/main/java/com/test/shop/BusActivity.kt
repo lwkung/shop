@@ -60,8 +60,12 @@ class BusActivity : AppCompatActivity(), AnkoLogger {
         }
 
         override fun onBindViewHolder(holder: BusHolder, position: Int) {
-            val bus = buses?.get(position)
-            holder.bindBus(bus!!)
+            //val bus = buses?.get(position)
+            //holder.bindBus(bus!!)
+
+            buses?.get(position)?.let {
+                holder.bindBus(it)
+            }
         }
 
     }
