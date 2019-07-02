@@ -1,7 +1,10 @@
 package com.test.shop
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -15,16 +18,20 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.row_fuction.view.*
+import org.jetbrains.anko.*
+import java.net.URL
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), AnkoLogger {
 
     private val TAG = MainActivity::class.java.simpleName
     var signup = false
-    var cacheService:Intent? = null
+    var cacheService: Intent? = null
     val auth = FirebaseAuth.getInstance()
     private val RC_SIGNUP = 200
     private val RC_NICKNAME = 210
@@ -104,8 +111,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun functionClicked(holder: FunctionHolder, position: Int) {
-        Log.d(TAG,"functionClicked: $position")
-        when(position){
+        Log.d(TAG, "functionClicked: $position")
+        when (position) {
             1 -> startActivity(Intent(this, ContactActivity::class.java))
             2 -> startActivity(Intent(this, ParkingActivity::class.java))
             5 -> startActivity(Intent(this, MovieActivity::class.java))
@@ -164,6 +171,17 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    val broadcastReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action.equals(CacheService.ACTION_CACHE_DONE)) {
+                //toast("MainActivity cache informed")
+                info("MainActivity cache informed")
+            }
+        }
+
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -171,18 +189,41 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> true
             R.id.action_cache -> {
-                cacheService = Intent(this, CacheService::class.java)
-                startService(cacheService)
-                startService(Intent(this, CacheService::class.java))
-                startService(Intent(this, CacheService::class.java))
+                doAsync {
+                    val json = URL("https://api.myjson.com/bins/bs7p7").readText()
+                    val movies = Gson().fromJson<List<Movie>>(json,
+                        object : TypeToken<List<Movie>>() {}.type)
+                    movies.forEach {
+                        startService(
+                            intentFor<CacheService>(
+                                "TITLE" to it.Title,
+                                "URL" to it.Poster
+                            )
+                        )
+                    }
+                    //val movie = movies.get(0)
+                    /*val intent = Intent(this, CacheService::class.java)
+                    intent.putExtra("TITLE", movie.Title)
+                    intent.putExtra("URL", movie.Poster)
+                    startService(intent)*/
+
+                }
+
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        val filter = IntentFilter(CacheService.ACTION_CACHE_DONE)
+        registerReceiver(broadcastReceiver, filter)
+    }
+
     override fun onStop() {
         super.onStop()
-        stopService(cacheService)
+        //stopService(cacheService)
+        unregisterReceiver(broadcastReceiver)
     }
 }
