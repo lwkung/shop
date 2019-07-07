@@ -43,10 +43,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         "News",
         "Movies",
         "Bus",
+        "Maps",
         "News",
-        "News",
-        "News",
-        "Maps"
+        "News"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,6 +117,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             4 -> startActivity(Intent(this, NewsActivity::class.java))
             5 -> startActivity(Intent(this, MovieActivity::class.java))
             6 -> startActivity(Intent(this, BusActivity::class.java))
+            7 -> startActivity(Intent(this, MapsActivity::class.java))
         }
     }
 
@@ -128,20 +128,22 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     override fun onResume() {
         super.onResume()
         //nickname.text = getNickName()
-        FirebaseDatabase.getInstance()
-            .getReference("users")
-            .child(auth.currentUser!!.uid)
-            .child("nickname")
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onCancelled(error: DatabaseError) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                }
+        if (auth.currentUser != null) {
+            FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(auth.currentUser!!.uid)
+                .child("nickname")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(error: DatabaseError) {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
 
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    nickname.text = dataSnapshot.value as String
-                }
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        nickname.text = dataSnapshot.value as String
+                    }
 
-            })
+                })
+        }
     }
 
     private fun authChanged(auth: FirebaseAuth) {
@@ -193,7 +195,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 doAsync {
                     val json = URL("https://api.myjson.com/bins/bs7p7").readText()
                     val movies = Gson().fromJson<List<Movie>>(json,
-                        object : TypeToken<List<Movie>>() {}.type)
+                        object : TypeToken<List<Movie>>() {}.type
+                    )
                     movies.forEach {
                         startService(
                             intentFor<CacheService>(
