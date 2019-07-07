@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         when (position) {
             1 -> startActivity(Intent(this, ContactActivity::class.java))
             2 -> startActivity(Intent(this, ParkingActivity::class.java))
+            4 -> startActivity(Intent(this, NewsActivity::class.java))
             5 -> startActivity(Intent(this, MovieActivity::class.java))
             6 -> startActivity(Intent(this, BusActivity::class.java))
         }

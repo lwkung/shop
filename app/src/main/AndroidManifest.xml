@@ -15,7 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".BusActivity"></activity>
+        <activity android:name=".NewsActivity"></activity>
+        <activity android:name=".BusActivity" />
         <activity android:name=".MovieActivity" />
         <activity android:name=".ParkingActivity" />
         <activity android:name=".ContactActivity" />
@@ -31,7 +32,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".CacheService"/>
+
+        <service android:name=".CacheService" />
     </application>
 
 </manifest>
