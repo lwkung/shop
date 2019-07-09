@@ -43,9 +43,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         "News",
         "Movies",
         "Bus",
-        "Maps",
-        "News",
-        "News"
+        "Maps"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,7 +137,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                     }
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        nickname.text = dataSnapshot.value as String
+                        if (dataSnapshot.value != null)
+                            nickname.text = dataSnapshot.value as String
                     }
 
                 })
@@ -194,7 +193,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             R.id.action_cache -> {
                 doAsync {
                     val json = URL("https://api.myjson.com/bins/bs7p7").readText()
-                    val movies = Gson().fromJson<List<Movie>>(json,
+                    val movies = Gson().fromJson<List<Movie>>(
+                        json,
                         object : TypeToken<List<Movie>>() {}.type
                     )
                     movies.forEach {
